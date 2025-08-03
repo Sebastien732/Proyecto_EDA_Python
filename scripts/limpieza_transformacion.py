@@ -2,10 +2,10 @@
 import pandas as pd
 import numpy as np
 # Cargar los DataFrames
-bank_df = pd.read_csv('Proyecto_EDA_Python/Proyecto_EDA_Python/data/bank.csv')
-customer_df_2012 = pd.read_csv('Proyecto_EDA_Python/Proyecto_EDA_Python/data/customer_2012.csv')
-customer_df_2013 = pd.read_csv('Proyecto_EDA_Python/Proyecto_EDA_Python/data/customer_2013.csv')
-customer_df_2014 = pd.read_csv('Proyecto_EDA_Python/Proyecto_EDA_Python/data/customer_2014.csv')
+bank_df = pd.read_csv('../datos/bank-additional.csv', sep=',')
+customer_df_2012 = pd.read_excel('../datos/customer-details.xlsx', sheet_name='2012')
+customer_df_2013 = pd.read_excel('../datos/customer-details.xlsx', sheet_name='2013')
+customer_df_2014 = pd.read_excel('../datos/customer-details.xlsx', sheet_name='2014')
 # Combinar los DataFrames de clientes
 df_customer_combinados = pd.concat([customer_df_2012, customer_df_2013, customer_df_2014], ignore_index=True)
 
@@ -24,9 +24,6 @@ bank_df[['default', 'housing', 'loan']] = bank_df[['default', 'housing', 'loan']
 
 
 
-
-
-
 # Realizamos el merge para obtener solo las entradas que tienen coincidencia en ambos DataFrames
 # en la exploracion previa se confirmo que el valor comun tiene el mismo formato
 
@@ -38,3 +35,13 @@ bank_cust_df = pd.merge(
     how='inner'  # Esta opción conserva solo las coincidencias
 )
 
+#Eliminacion de lineas sin valores de los atributos 'job', 'marital' y 'date' que representan menos de 1% del data frame
+bank_cust_df = bank_cust_df.dropna(subset=['job', 'marital', 'date'])
+# Por la columna 'education' replazamos las lineas sin valores por el valor "unknown"
+bank_cust_df['education'] = bank_cust_df['education'].fillna('unknown')
+
+# cambiamos el tipo de la columna 'y' a booleano
+bank_cust_df['y'] = bank_cust_df['y'].astype(bool)
+
+# Renombrar la columna 'y' a 'subscribed'
+bank_cust_df = bank_cust_df.rename(columns={'y': 'subscribed'})

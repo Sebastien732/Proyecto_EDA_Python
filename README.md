@@ -133,39 +133,58 @@ Se realizó una inspección preliminar de ambos archivos utilizando los siguient
 3. ## Limpieza y transformación: 
 *normalización de variables categóricas, tratamiento de fechas, codificación de valores booleanos*
 
-Se combina de forma vertical los 3 dataframes de clientes en uno nuevo asignado a la variable `df_customer_combinados` 
-Se combinan los data frame `bank_df` y `df_customer_combinados` usando la columna `ID` como clave comun y se assignan a las variable `bank_cust_df`
-en el proceso perdemos 170 endradas del dataframe de clientes. Estos datos parecen innecesarios ya que estos clientes no participaron a la camapaña que estudiamos.
-
 
 En la columna `age` nos falta cerca de 12% de los valores. Este dato parece crucial por lo cual no podemos eliminarlo. Procedemos a remplazar los valores faltante por una edad promedia correspondiente a otros clientes con perfiles similar usando los atributos `job` & `education` 
 
+Se procede a la eliminacion de lineas sin valores de los atributos 'job', 'marital' y 'date' que representan menos de 1% del data frame. 
+Por la columna 'education' replazamos las lineas sin valores por el valor "unknown"
+
+Tras observar sample del data frame se observa una posible correspondencia de valores unicos entre las columnas 'cons.price.idx' y 'cons.conf.idx'.
+Confirmamos esta teoria y rellenanos los valores faltantes de la columna 'cons.price.idx'
+
+Quedan valores nulos por en 'euribor3m'. Representan mas de 20% de los datos disponibles. Se sospecha que se podria calcular estos valores faltantes. Lo dejamos de  momento y lo estudiaremos mas adelante.
+
+
+Durante la fase de exploracion de datos se identifico varias columnas de tipo incorrecto que vamos a transformar de la manera siguiente:  
+ 1   age             float64 ==> inter  
+ 5   default         float64 ==> bool  
+ 6   housing         float64 ==> bool  
+ 7   loan            float64 ==> bool  
+ 8   contact         object  
+ 9   duration        int64   
+ 10  campaign        int64   
+ 11  pdays           int64   
+ 12  previous        int64   
+ 13  poutcome        object  
+ 14  emp.var.rate    float64  
+ 15  cons.price.idx  object ==> float  
+ 16  cons.conf.idx   object ==> float  
+ 17  euribor3m       object ==> float  
+ 18  nr.employed     object ==> inter  
+ 19  ~~y~~ subscribed    object ==> bool  
+ 20  date            object ==> object date  
+ 21  latitude        float64  
+ 22  longitude       float64  
+ 23  id_             object  
+
+
+Ademas del cambio de tipo de dato de la columna "age", se ha reemplazado los valores nulos por un promedio usando valores "job" y "education".
+En la columna "pdays" el valor 999 es un valor ficticio que se usa cuando el cliente nunca fue contactado ya el calculo desde la ultima llamada no se puede hacer. Cambiaremos este valor por NaN para poder excluirlo de calculo posteriores (promedio ect..)
+por las columnas 15, 16 y 17 se reemplazo la coma por un punto antes de convertir los valores a float
+por la columna 18 "nr.employed" se uniformisa el formato usando el mismo metodo y un par de cambio de formato para añadir un decimal y quitar el punto. Se obtiene una referencia de 5 digitos.
+Se renombra la columna "y" a "subscribed", cambiamos los valores "yes" a "True" y "no" a "False" y finalmente cambiamos el tipo de dato a boleano.
+En la columna date, convertimos los meses en numero usando un diccionario y luego se convirtio en formato date_time mostrando el valore como dd-mm-aa.
 
 
 
 
-Durante la fase de exploracion de datos se identifico varias columnas de tipo incorrecto que vamos a transformar de la manera siguiente:
- 1   age             float64 ==> inter
- 5   default         float64 ==> bool
- 6   housing         float64 ==> bool
- 7   loan            float64 ==> bool
 
- 8   contact         43000 non-null  object 
- 9   duration        43000 non-null  int64  
- 10  campaign        43000 non-null  int64  
- 11  pdays           43000 non-null  int64  
- 12  previous        43000 non-null  int64  
- 13  poutcome        43000 non-null  object 
- 14  emp.var.rate    43000 non-null  float64
- 15  cons.price.idx  42529 non-null  object 
- 16  cons.conf.idx   43000 non-null  object 
- 17  euribor3m       33744 non-null  object 
- 18  nr.employed     43000 non-null  object 
- 19  y               43000 non-null  object 
- 20  date            42752 non-null  object 
- 21  latitude        43000 non-null  float64
- 22  longitude       43000 non-null  float64
- 23  id_             43000 non-null  object
+
+
+Se combina de forma vertical los 3 dataframes de clientes en uno nuevo asignado a la variable `df_customer_combinados` 
+se cambia los datos de la columna Dt_Customer a fecha con formato dd-mm-aa
+Se combinan los data frame `bank_df` y `df_customer_combinados` usando la columna `ID` como clave comun y se assigna el nombre `df_bank_cust`. el DF contiene 42332 entradas y 29 columnas.
+En el proceso perdemos 170 endradas del dataframe de clientes. Estos datos parecen innecesarios ya que estos clientes no participaron a la camapaña que estudiamos.
 
 
 
