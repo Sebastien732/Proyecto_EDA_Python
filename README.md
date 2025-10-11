@@ -156,56 +156,6 @@ Se realizó una inspección preliminar de ambos archivos utilizando los siguient
 
 ### 🔍 Análisis de valores nulos en la columna `euribor3m`
 
-Se han detectado valores nulos en la columna `euribor3m`, que representan **más del 20%** del total de registros disponibles. Dado este volumen significativo de datos faltantes, se considera viable aplicar técnicas de imputación para estimar dichos valores.
-
-Tras evaluar diferentes métodos de imputación —**media**, **mediana**, **moda** y un **modelo de regresión lineal**— se opta por este último. La decisión se basa en la **fuerte correlación** observada entre `euribor3m` y `emp.var.rate`, con un coeficiente de **0.9724**, lo que sugiere que el modelo de regresión puede proporcionar estimaciones precisas y coherentes.
-
-
-
-Durante la fase de exploracion de datos se identifico varias columnas de tipo incorrecto que vamos a transformar de la manera siguiente:  
- 1   age             float64 ==> inter  
- 5   default         float64 ==> bool  
- 6   housing         float64 ==> bool  
- 7   loan            float64 ==> bool  
- 8   contact         object  
- 9   duration        int64   
- 10  campaign        int64   
- 11  pdays           int64   
- 12  previous        int64   
- 13  poutcome        object  
- 14  emp.var.rate    float64  
- 15  cons.price.idx  object ==> float  
- 16  cons.conf.idx   object ==> float  
- 17  euribor3m       object ==> float  
- 18  nr.employed     object ==> inter  
- 19  ~~y~~ subscribed    object ==> bool  
- 20  date            object ==> object date  
- 21  latitude        float64  
- 22  longitude       float64  
- 23  id_             object  
-
-
-Ademas del cambio de tipo de dato de la columna "age", se ha reemplazado los valores nulos por un promedio usando valores "job" y "education".  
-En la columna "pdays" el valor 999 es un valor ficticio que se usa cuando el cliente nunca fue contactado ya el calculo desde la ultima llamada no se puede hacer. Cambiaremos este valor por NaN para poder excluirlo de calculo posteriores (promedio ect..)  
-En las columnas 15, 16 y 17 se reemplazo la coma por un punto antes de convertir los valores a float.  
-En la columna 18 "nr.employed" se uniformisa el formato usando el mismo metodo y un par de cambio de formato para añadir un decimal y quitar el punto. Se obtiene asi un valor uniforme de 5 digitos.  
-Se renombra la columna "y" a "subscribed", cambiamos los valores "yes" a "True" y "no" a "False" y finalmente cambiamos el tipo de dato a boleano.  
-En la columna "date", convertimos los meses en numero usando un diccionario y luego se convirtio en formato date_time mostrando el valore como dd-mm-aa. 
-Tambien se añade columnas 'contact_month' y 'contact_year' presente en la descripcion inicial pero faltando en el ficher csv original.
-
-
-
-Se combina de forma vertical los 3 dataframes de clientes en uno nuevo asignado a la variable `df_customer_combinados` 
-se cambia los datos de la columna Dt_Customer a fecha con formato dd-mm-aa
-Finalemente se combinan los data frame `bank_df` y `df_customer_combinados` usando la columna `ID` como clave comun y se assigna el nombre `df_bank_cust`. el DF contiene 42332 entradas y 29 columnas.
-En el proceso perdemos 170 endradas del dataframe de clientes. Estos datos parecen innecesarios ya que estos clientes no participaron a la camapaña que estudiamos.
-Se resetea el indice y se quita las columnas innecesarias de indice (el de origen 'customer_df') y se elimina tambien las columnas 'ID' y '_id' .
-
-Tras la limpieza y transformacion de los datos, creamos un fichero .CSV del data frame final df_bank_cust
-
-
-### 🔍 Análisis de valores nulos en la columna `euribor3m`
-
 Se han detectado valores nulos en la columna `euribor3m`, que representan **más del 20%** del total de registros disponibles. Dado este volumen significativo de datos faltantes, se considera adecuado aplicar técnicas de imputación para estimar dichos valores.
 
 Tras evaluar distintos métodos —**media**, **mediana**, **moda** y un **modelo de regresión lineal**— se opta por este último. La decisión se basa en la **fuerte correlación** observada entre `euribor3m` y `emp.var.rate`, con un coeficiente de **0.9724**, lo que sugiere que el modelo de regresión puede proporcionar estimaciones precisas y coherentes.
@@ -267,8 +217,82 @@ Tras la limpieza y transformación de los datos, se exportó el DataFrame final 
 
 
 
-4. ## Análisis descriptivo:
- *estadísticas, distribuciones, correlaciones entre variables*
+4. ## 📊 Análisis de suscripción: suscriptores vs. no suscriptores
+
+Este análisis tiene como objetivo identificar los factores que influyen en el éxito de una campaña de marketing bancario, comparando las características de los clientes que se han suscrito frente a los que no lo han hecho.
+
+## 🗺️ Ubicación geográfica
+El mapa de coordenadas no revela focos geográficos significativos de éxito. La distribución de suscriptores es homogénea, lo que sugiere que la ubicación no es un factor determinante.
+
+## 🎂 Edad
+Los rangos de edad con mayor tasa de suscripción se encuentran en los extremos: menores de 24 años y mayores de 59 años.
+
+## 👔 Ocupación
+La tendencia observada en la edad se confirma al analizar la ocupación. Estudiantes y jubilados presentan las tasas más altas de suscripción.
+
+## 💍 Estado civil
+Los clientes solteros muestran una ligera ventaja en la tasa de suscripción respecto a otras categorías.
+
+## 🎓 Nivel educativo
+Excluyendo los casos con nivel educativo desconocido, se observa un mayor éxito en los clientes con educación universitaria y también entre los iletrados.
+
+## 💳 Historial de impago
+Los clientes sin incidencias de pago tienen una mayor tasa de suscripción.
+
+## 🏠 Préstamos hipotecarios y personales
+No se observan diferencias significativas entre suscriptores y no suscriptores en relación con la tenencia de préstamos.
+
+## ☎️ Método de contacto
+El contacto vía teléfono móvil es claramente más efectivo que el contacto por línea fija. Se recomienda priorizar la recopilación de números móviles para futuras campañas.
+
+## ⏱️ Duración de la última llamada
+Las llamadas a suscriptores tienden a ser más largas, posiblemente debido al tiempo necesario para completar el proceso de contratación.
+
+## 🔁 Número de interacciones durante la campaña
+Los suscriptores han recibido más contactos en promedio. Sería útil analizar el contenido de estas interacciones.
+
+## 📆 Días desde la última interacción
+No se observan diferencias entre suscriptores y no suscriptores.
+
+## 📈 Resultados de campañas anteriores
+Los clientes que ya habían suscrito en campañas anteriores tienen una probabilidad significativamente mayor de volver a hacerlo. El 65% de los suscriptores actuales ya habían participado en campañas previas.
+
+---
+
+# 💰 Parámetros financieros
+
+## 📉 Tasa de variación del empleo (`emp.var.rate`)
+Mayor tasa de suscripción cuando el valor es inferior a -0.2, con una excepción en -1.8.
+
+## 🛒 Índice de precios al consumidor (`cons.price.idx`)
+Mayor éxito en los extremos del índice (valores bajos y altos).
+
+## 📉 Índice de confianza del consumidor (`cons.conf.idx`)
+Menor éxito entre los rangos -47.1 a -41.8 y -36.4 a -36.1.
+
+## 💶 Euribor a tres meses (`euribor3m`)
+Menor éxito cuando el índice está entre 1.2 y 1.5, y también cuando supera 3.1.
+
+## 👥 Número de empleados
+Mayor tasa de suscripción en empresas con menor número de empleados.
+
+---
+
+# 📅 Temporalidad
+
+- **Año**: La tasa de éxito es estable año tras año.
+- **Mes**: Octubre destaca como el mes con mayor proporción de suscriptores.
+
+---
+
+# 📊 Otros factores
+
+- **Ingresos anuales**: No se observa una correlación clara.
+- **Número de hijos**: No hay impacto significativo.
+- **Antigüedad del cliente**: Mayor éxito en clientes recientes (desde 2014).
+- **Visitas a la web**: No se detecta una relación clara.
+
+---
 
 
 
@@ -282,9 +306,26 @@ Tras la limpieza y transformación de los datos, se exportó el DataFrame final 
 6. ## Conclusiones:
  *hallazgos significativos, propuestas de mejora en las campañas*
 
+# 🧑‍💼 Perfil medio del cliente suscriptor
 
+- **Edad**: Menores de 24 o mayores de 59 años.
+- **Ocupación**: Estudiantes y jubilados.
+- **Estado civil**: Solteros.
+- **Educación**: Universitaria o sin estudios formales.
+- **Historial financiero**: Sin impagos.
+- **Antigüedad**: Clientes recientes (desde 2014).
+- **Método de contacto**: Teléfono móvil.
+- **Interacción previa**: Participación en campañas anteriores.
 
+---
+# ✅ Recomendaciones para futuras campañas
 
+1. **Segmentación precisa**: Priorizar clientes jóvenes, mayores, estudiantes y jubilados.
+2. **Optimización del canal de contacto**: Usar preferentemente teléfonos móviles.
+3. **Refuerzo en octubre**: Aumentar recursos humanos y horarios en este mes.
+4. **Seguimiento de campañas anteriores**: Recontactar clientes que ya han suscrito antes.
+5. **Análisis de contenido de llamadas**: Evaluar qué tipo de interacción genera mayor conversión.
+6. **Cruce de variables financieras**: Analizar combinaciones de índices para identificar patrones más robustos.????????????????????
 
 
 

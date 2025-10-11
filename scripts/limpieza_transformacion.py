@@ -42,7 +42,7 @@ bank_df = bank_df.dropna(subset=['job', 'marital', 'housing', 'loan','date'])
 bank_df['education'] = bank_df['education'].fillna('unknown')
 
 # cambio del valor "999" de la columna 'pdays' por "NaN"
-bank_df.loc[bank_df['pdays'] == 999, 'pdays'] = pd.NA
+bank_df['pdays'] = bank_df['pdays'].replace(999, np.nan)
 
 # convertir la columna 'pdays' a tipo Int64 (permite NaN)
 bank_df['pdays'] = bank_df['pdays'].astype('Int64')
